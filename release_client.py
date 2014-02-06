@@ -43,17 +43,26 @@ def main():
 
     target_committed_tasks_to_milestone_and_release(project, milestone)
 
+    date_released = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M')
+
     print("""
 
     In the repo, run:
 
         git tag -s %(milestone)s && git push gerrit %(milestone)s
 
-    On Launchpad, click Release Now and close the milestone:
+    On Launchpad, click Create Release:
 
         %(milestone_url)s
 
-    """ % {'milestone': args.milestone, 'milestone_url': milestone.web_link})
+    Enter the current UTC time as the Date Released:
+
+       %(date_released)s
+
+    """ % {
+        'milestone': args.milestone,
+        'milestone_url': milestone.web_link,
+        'date_released': date_released})
 
 
 if __name__ == '__main__':
