@@ -26,7 +26,7 @@ def save_task(task, retries=10):
     return True
 
 
-def target_committed_tasks_to_milestone_and_release(project, milestone):
+def target_committed_tasks_to_milestone(project, milestone, release=False):
     for task in project.searchTasks(status='Fix Committed'):
         if task.bug.id in IGNORED_BUGS:
             continue
@@ -39,7 +39,7 @@ def target_committed_tasks_to_milestone_and_release(project, milestone):
             print('\tSetting milestone to %s...' % milestone)
             mutated = True
 
-        if task.status != 'Fix Released':
+        if release and task.status != 'Fix Released':
             task.status = 'Fix Released'
             print('\tSetting status to Fix Released...')
             mutated = True
@@ -55,7 +55,9 @@ def target_committed_tasks_to_milestone_and_release(project, milestone):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Publish a release of an OpenStack Python client.')
+        description='Prepare a release of an OpenStack Python client.')
+    parser.add_argument('--release', action='store_true',
+                        help='Mark bugs as Fix Released.')
     parser.add_argument('project')
     parser.add_argument('milestone')
     args = parser.parse_args()
@@ -73,12 +75,12 @@ def main():
             args.milestone)
     milestone = milestones[0]
 
-    target_committed_tasks_to_milestone_and_release(project, milestone)
+    target_committed_tasks_to_milestone(project, milestone,
+                                        release=args.release)
 
     date_released = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M')
 
     print("""
-
     In the repo, run:
 
         git tag -s %(milestone)s && git push gerrit %(milestone)s
@@ -89,12 +91,23 @@ def main():
 
     Enter the current UTC time as the Date Released:
 
-       %(date_released)s
-
-    """ % {
+       %(date_released)s""" % {
         'milestone': args.milestone,
         'milestone_url': milestone.web_link,
         'date_released': date_released})
+
+    if args.release:
+        print()
+        raise SystemExit()
+    print("""
+    Finally, re-run this script with the --release argument to mark changes as
+    fix released.
+
+        python %(script)s --release %(project)s %(milestone)s
+    """ % {
+        'script': __file__,
+        'project': args.project,
+        'milestone': args.milestone})
 
 
 if __name__ == '__main__':
