@@ -25,7 +25,8 @@ def unassign_if_inactive(task, date_threshold):
             task.assignee = None
             if task.status == 'In Progress':
                 task.status = 'Triaged'
-            task.bug.newMessage(content='Unassigning due to inactivity.')
+            task.bug.newMessage(
+                content='Automatically unassigning due to inactivity.')
 
             if not DRY_RUN:
                 task.lp_save()
