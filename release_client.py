@@ -13,7 +13,7 @@ NOW = datetime.datetime.utcnow()
 TWO_MONTHS_AGO = (NOW - datetime.timedelta(days=65)).utctimetuple()
 
 # certain bugs are basically impossible to update due to LP timeouts
-IGNORED_BUGS = [1229324]
+IGNORED_BUGS = [1229324, 1342274]
 
 
 def save_task(task, retries=10):
