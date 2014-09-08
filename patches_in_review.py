@@ -21,7 +21,7 @@ BP_RE = r'''(?x)                         # verbose regexp
             ([0-9a-zA-Z-_]+)             # any identifier or number'''
 
 
-def query(project, branch):
+def query(project, branch, filters):
     command = ['ssh', '-p', '29418', 'review.openstack.org']
     command.extend(['gerrit', 'query', '--format=JSON'])
     command.extend(['--dependencies'])
@@ -30,6 +30,9 @@ def query(project, branch):
         ['project:%(project)s AND branch:%(branch)s AND status:open' % {
             'project': project,
             'branch': branch}])
+    if filters:
+        command.extend(['AND %s' % ' AND '.join(filters)])
+
     print(' '.join(command))
     output = subprocess.check_output(command)
 
@@ -113,7 +116,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('project')
     parser.add_argument('--branch', default='master')
+    parser.add_argument('filters', nargs='*')
     args = parser.parse_args()
-    changes = query(args.project, args.branch)
+    changes = query(args.project, args.branch, args.filters)
     hierarchy = build_hierarchy(changes)
     print_hierarchy(hierarchy)
