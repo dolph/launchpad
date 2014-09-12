@@ -126,4 +126,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     changes = query(args.project, args.branch, args.filters)
     hierarchy = build_hierarchy(changes)
-    print_hierarchy(hierarchy)
+    if hierarchy:
+        print_hierarchy(hierarchy)
+    else:
+        print('(this list is empty!)')
