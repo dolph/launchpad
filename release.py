@@ -97,7 +97,7 @@ def main():
         'date_released': date_released})
 
     if args.release:
-        print
+        print()
         raise SystemExit()
     print("""
     Finally, re-run this script with the --release argument to mark changes as
