@@ -55,7 +55,7 @@ def target_committed_tasks_to_milestone(project, milestone, release=False):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Prepare a release of an OpenStack Python client.')
+        description='Prepare a release of an OpenStack project.')
     parser.add_argument('--release', action='store_true',
                         help='Mark bugs as Fix Released.')
     parser.add_argument('project')
