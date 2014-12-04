@@ -1,11 +1,13 @@
 import argparse
 import datetime
+import getpass
 import os
 
 from launchpadlib import launchpad
 from lazr.restfulclient import errors
 
-NAME = 'Dolph Mathews'
+
+NAME = getpass.getuser()
 LP_INSTANCE = 'production'
 CACHE_DIR = os.path.expanduser('~/.launchpadlib/cache/')
 
