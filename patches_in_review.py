@@ -64,7 +64,13 @@ def build_hierarchy(changes):
 
 
 def print_hierarchy(hierarchy, indentation=0):
-    for change_number, change in hierarchy.iteritems():
+    # iterate through the hierarchy in order by change number (oldest to
+    # newest). there must be a simpler way to do this? whatever it is, it's
+    # escaping me right now.
+    change_numbers = map(unicode, sorted(map(int, hierarchy.keys())))
+    for change_number in change_numbers:
+        change = hierarchy[change_number]
+
         bug_match = re.search(BUG_RE, change['commitMessage'])
         bug_number = bug_match.group(2) if bug_match is not None else None
 
