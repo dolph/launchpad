@@ -33,7 +33,7 @@ def query(project, branch, filters):
     if filters:
         command.extend(['AND %s' % ' AND '.join(filters)])
 
-    print(' '.join(command))
+    # print(' '.join(command))
     output = subprocess.check_output(command)
 
     changes = [json.loads(change) for change in output.splitlines()[:-1]]
