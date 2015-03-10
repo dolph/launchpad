@@ -1,11 +1,29 @@
+"""Prepare a release of an OpenStack project."""
+
 import argparse
 import datetime
+import getpass
 import os
 
 from launchpadlib import launchpad
 from lazr.restfulclient import errors
 
-NAME = 'Dolph Mathews'
+
+DESCRIPTION = """Prepare a release of an OpenStack project.
+
+Basic workflow starts by creating a milestone in Launchpad that you want to
+prepare for release. Name the milestone using a version scheme of some sort.
+Once that exists, you can target all Fix Committed bugs to the milestone using:
+
+    $ python release.py python-keystoneclient 0.13.4
+
+This is sort of a dry-run for a release. You can get a sense of what the
+release will look like, and you'll be given the few next steps of instructions
+after that.
+
+"""
+
+NAME = getpass.getuser()
 LP_INSTANCE = 'production'
 CACHE_DIR = os.path.expanduser('~/.launchpadlib/cache/')
 
@@ -54,8 +72,7 @@ def target_committed_tasks_to_milestone(project, milestone, release=False):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='Prepare a release of an OpenStack Python client.')
+    parser = argparse.ArgumentParser(description=DESCRIPTION)
     parser.add_argument('--release', action='store_true',
                         help='Mark bugs as Fix Released.')
     parser.add_argument('project')
@@ -80,6 +97,11 @@ def main():
 
     date_released = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M')
 
+    if args.release:
+        print("If you haven't already, you now need to do the following few "
+              "steps.")
+        print()
+
     print("""
     In the repo, run:
 
@@ -97,7 +119,7 @@ def main():
         'date_released': date_released})
 
     if args.release:
-        print
+        print()
         raise SystemExit()
     print("""
     Finally, re-run this script with the --release argument to mark changes as

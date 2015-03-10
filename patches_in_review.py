@@ -33,6 +33,7 @@ def query(project, branch, filters):
     if filters:
         command.extend(['AND %s' % ' AND '.join(filters)])
 
+    # output command for debugging
     # print(' '.join(command))
     output = subprocess.check_output(command)
 
