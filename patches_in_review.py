@@ -90,9 +90,8 @@ def print_hierarchy(hierarchy, indentation=0):
         else:
             reference = ''
 
-        verified = False
+        passing_tests = None
         work_in_progress = False
-        failing = False
         blocked = False
         needs_revision = False
         plus_ones = 0
@@ -102,9 +101,9 @@ def print_hierarchy(hierarchy, indentation=0):
             if approval['type'] == 'Workflow' and approval['value'] == '-1':
                 work_in_progress = True
             if approval['type'] == 'Verified' and approval['value'] == '-1':
-                failing = True
+                passing_tests = False
             if approval['type'] == 'Verified' and approval['value'] == '1':
-                verified = True
+                passing_tests = True
             if approval['type'] == 'Code-Review' and approval['value'] == '-2':
                 blocked = True
             if approval['type'] == 'Code-Review' and approval['value'] == '-1':
@@ -118,12 +117,12 @@ def print_hierarchy(hierarchy, indentation=0):
 
         if blocked:
             status = ' (blocked)'
-        elif approved and failing:
+        elif approved and passing_tests is False:
             status = ' (approved but failing)'
-        elif not verified:
-            status = ' (unverified)'
-        elif failing:
+        elif passing_tests is False:
             status = ' (failing)'
+        elif passing_tests is None:
+            status = ' (pending tests)'
         elif approved:
             status = ' (approved)'
         elif work_in_progress:
