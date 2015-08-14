@@ -90,23 +90,49 @@ def print_hierarchy(hierarchy, indentation=0):
         else:
             reference = ''
 
-        blocked = False
-        approved = False
         work_in_progress = False
+        failing = False
+        blocked = False
+        needs_revision = False
+        plus_ones = 0
+        plus_twos = 0
+        approved = False
         for approval in change['currentPatchSet'].get('approvals', []):
-            if approval['type'] == 'Workflow' and approval['value'] == '1':
-                approved = True
             if approval['type'] == 'Workflow' and approval['value'] == '-1':
                 work_in_progress = True
+            if approval['type'] == 'Verified' and approval['value'] == '-1':
+                failing = True
             if approval['type'] == 'Code-Review' and approval['value'] == '-2':
                 blocked = True
+            if approval['type'] == 'Code-Review' and approval['value'] == '-1':
+                needs_revision = True
+            if approval['type'] == 'Code-Review' and approval['value'] == '1':
+                plus_ones += 1
+            if approval['type'] == 'Code-Review' and approval['value'] == '2':
+                plus_twos += 1
+            if approval['type'] == 'Workflow' and approval['value'] == '1':
+                approved = True
 
         if blocked:
             status = ' (blocked)'
+        elif approved and failing:
+            status = ' (approved but failing)'
+        elif failing:
+            status = ' (failing)'
         elif approved:
             status = ' (approved)'
         elif work_in_progress:
             status = ' (WIP)'
+        elif needs_revision:
+            status = ' (needs revision)'
+        elif plus_twos == 1:
+            status = ' (+2)'
+        elif plus_twos:
+            status = ' (*%dx*+2)' % plus_twos
+        elif plus_ones == 1:
+            status = ' (+1)'
+        elif plus_ones:
+            status = ' (*%dx*+1)' % plus_ones
         else:
             status = ''
 
