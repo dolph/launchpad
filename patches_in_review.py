@@ -20,6 +20,10 @@ BP_RE = r'''(?x)                         # verbose regexp
             [ \t\f\v]*                   # don't want to match newline
             ([0-9a-zA-Z-_]+)             # any identifier or number'''
 
+# github markdown rendering breaks when you give it more than 10 nested bullet
+# points, so we carry a max value to avoid the broken rendering.
+MAX_INDENTATION = 10
+
 
 def query(project, branch, filters):
     command = ['ssh', '-p', '29418', 'review.openstack.org']
@@ -65,6 +69,10 @@ def build_hierarchy(changes):
 
 
 def print_hierarchy(hierarchy, indentation=0):
+    if indentation >= MAX_INDENTATION:
+        # bail early if we're being asked to produce markdown that github can't render.
+        return
+
     # iterate through the hierarchy in order by change number (oldest to
     # newest). there must be a simpler way to do this? whatever it is, it's
     # escaping me right now.
