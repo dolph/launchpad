@@ -70,7 +70,8 @@ def build_hierarchy(changes):
 
 def print_hierarchy(hierarchy, indentation=0):
     if indentation >= MAX_INDENTATION:
-        # bail early if we're being asked to produce markdown that github can't render.
+        # bail early if we're being asked to produce markdown that github can't
+        # render.
         return
 
     # iterate through the hierarchy in order by change number (oldest to
