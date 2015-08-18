@@ -109,6 +109,8 @@ def print_hierarchy(hierarchy, indentation=0):
         for approval in change['currentPatchSet'].get('approvals', []):
             if approval['type'] == 'Workflow' and approval['value'] == '-1':
                 work_in_progress = True
+            if approval['type'] == 'Verified' and approval['value'] == '-2':
+                passing_tests = False
             if approval['type'] == 'Verified' and approval['value'] == '-1':
                 passing_tests = False
             if approval['type'] == 'Verified' and approval['value'] == '1':
