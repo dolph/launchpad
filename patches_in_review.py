@@ -127,11 +127,15 @@ def print_hierarchy(hierarchy, indentation=0):
             status = ' (blocked)'
         elif approved and passing_tests is False:
             status = ' (approved but failing)'
+        elif approved and passing_tests is None:
+            status = ' (gating)'
         elif passing_tests is False:
             status = ' (failing)'
         elif passing_tests is None:
             status = ' (pending tests)'
         elif approved:
+            # this is shown when an approved patch depends on one that is not
+            # approved
             status = ' (approved)'
         elif work_in_progress:
             status = ' (WIP)'
