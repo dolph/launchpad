@@ -164,16 +164,24 @@ def print_hierarchy(hierarchy, indentation=0):
         else:
             status = ''
 
-        if reviewers:
-            status += ' (%s)' % ', '.join(sorted(reviewers))
+        # remove authors from the reviewers list
+        reviewers = set(reviewers).difference(authors)
 
-        print('%s- %s%s [%s](%s)%s' % (
+        print('%s- %s[%s](%s)%s' % (
             ' ' * indentation * 2,
             reference,
-            ', '.join(authors),
             change['subject'],
             change['url'],
             status))
+        print('')
+        extra_reviewers = (
+            '; also reviewed by ' + ', '.join(sorted(reviewers))
+            if reviewers else '')
+        print('%sAuthored by %s%s.' % (
+            ' ' * (indentation + 1) * 2,
+            ', '.join(authors),
+            extra_reviewers))
+        print('')
         print_hierarchy(change.get('dependencies', {}), indentation + 1)
 
 
