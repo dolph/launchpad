@@ -80,6 +80,9 @@ def print_hierarchy(hierarchy, indentation=0):
     change_numbers = map(unicode, sorted(map(int, hierarchy.keys())))
     for change_number in change_numbers:
         change = hierarchy[change_number]
+        authors = set([
+            change['owner']['username'],
+            change['currentPatchSet']['uploader']['username']])
 
         bug_match = re.search(BUG_RE, change['commitMessage'])
         bug_number = bug_match.group(2) if bug_match is not None else None
@@ -99,13 +102,14 @@ def print_hierarchy(hierarchy, indentation=0):
         else:
             reference = ''
 
+        reviewers = []
         passing_tests = None
         work_in_progress = False
-        blocked = False
-        needs_revision = False
-        plus_ones = 0
-        plus_twos = 0
-        approved = False
+        blocked_by = []
+        needs_revision_by = []
+        plus_ones_by = []
+        plus_twos_by = []
+        approved_by = []
         for approval in change['currentPatchSet'].get('approvals', []):
             if approval['type'] == 'Workflow' and approval['value'] == '-1':
                 work_in_progress = True
@@ -116,48 +120,57 @@ def print_hierarchy(hierarchy, indentation=0):
             if approval['type'] == 'Verified' and approval['value'] == '1':
                 passing_tests = True
             if approval['type'] == 'Code-Review' and approval['value'] == '-2':
-                blocked = True
+                blocked_by.append(approval['by']['username'])
             if approval['type'] == 'Code-Review' and approval['value'] == '-1':
-                needs_revision = True
+                needs_revision_by.append(approval['by']['username'])
             if approval['type'] == 'Code-Review' and approval['value'] == '1':
-                plus_ones += 1
+                plus_ones_by.append(approval['by']['username'])
             if approval['type'] == 'Code-Review' and approval['value'] == '2':
-                plus_twos += 1
+                plus_twos_by.append(approval['by']['username'])
             if approval['type'] == 'Workflow' and approval['value'] == '1':
-                approved = True
+                approved_by.append(approval['by']['username'])
 
-        if blocked:
-            status = ' (blocked)'
-        elif approved and passing_tests is False:
-            status = ' (approved but failing)'
-        elif approved and passing_tests is None:
+            if approval['type'] == 'Code-Review':
+                reviewers.append(approval['by']['username'])
+
+        if blocked_by:
+            status = ' (**blocked** by %s)' % ', '.join(sorted(blocked_by))
+        elif approved_by and passing_tests is False:
+            status = ' (approved but **failing**)'
+        elif approved_by and passing_tests is None:
             status = ' (gating)'
         elif passing_tests is False:
             status = ' (failing)'
         elif passing_tests is None:
             status = ' (pending tests)'
-        elif approved:
+        elif approved_by:
             # this is shown when an approved patch depends on one that is not
             # approved
             status = ' (approved)'
         elif work_in_progress:
             status = ' (WIP)'
-        elif needs_revision:
-            status = ' (needs revision)'
-        elif plus_twos == 1:
-            status = ' (+2)'
-        elif plus_twos:
-            status = ' (*%dx*+2)' % plus_twos
-        elif plus_ones == 1:
-            status = ' (+1)'
-        elif plus_ones:
-            status = ' (*%dx*+1)' % plus_ones
+        elif needs_revision_by:
+            status = (' (**needs revision** according to %s)' %
+                      ', '.join(sorted(needs_revision_by)))
+            reviewers = set(reviewers).difference(needs_revision_by)
+        elif plus_twos_by:
+            status = (' (**+2** by %s)' %
+                      ', '.join(sorted(plus_twos_by)))
+            reviewers = set(reviewers).difference(plus_twos_by)
+        elif plus_ones_by:
+            status = (' (**+1** by %s)' %
+                      ', '.join(sorted(plus_ones_by)))
+            reviewers = set(reviewers).difference(plus_ones_by)
         else:
             status = ''
 
-        print('%s- %s[%s](%s)%s' % (
+        if reviewers:
+            status += ' (%s)' % ', '.join(sorted(reviewers))
+
+        print('%s- %s%s [%s](%s)%s' % (
             ' ' * indentation * 2,
             reference,
+            ', '.join(authors),
             change['subject'],
             change['url'],
             status))
