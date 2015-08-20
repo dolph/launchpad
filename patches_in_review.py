@@ -133,6 +133,9 @@ def print_hierarchy(hierarchy, indentation=0):
             if approval['type'] == 'Code-Review':
                 reviewers.append(approval['by']['username'])
 
+        # remove authors from the reviewers list
+        reviewers = set(reviewers).difference(authors)
+
         if blocked_by:
             status = ' (**blocked** by %s)' % ', '.join(sorted(blocked_by))
         elif approved_by and passing_tests is False:
@@ -150,9 +153,9 @@ def print_hierarchy(hierarchy, indentation=0):
         elif work_in_progress:
             status = ' (WIP)'
         elif needs_revision_by:
+            reviewers = set(reviewers).difference(needs_revision_by)
             status = (' (**needs revision** according to %s)' %
                       ', '.join(sorted(needs_revision_by)))
-            reviewers = set(reviewers).difference(needs_revision_by)
         elif plus_twos_by:
             status = (' (**+2** by %s)' %
                       ', '.join(sorted(plus_twos_by)))
@@ -164,22 +167,16 @@ def print_hierarchy(hierarchy, indentation=0):
         else:
             status = ''
 
-        # remove authors from the reviewers list
-        reviewers = set(reviewers).difference(authors)
+        status += (' (reviewers: %s)' % ', '.join(sorted(reviewers))
+                   if reviewers else '')
 
-        print('%s- %s[%s](%s)%s' % (
+        print('%s- %s[%s](%s) by %s%s' % (
             ' ' * indentation * 2,
             reference,
             change['subject'],
             change['url'],
-            status))
-        extra_reviewers = (
-            '; also reviewed by ' + ', '.join(sorted(reviewers))
-            if reviewers else '')
-        print('%sAuthored by %s%s.' % (
-            ' ' * (indentation + 1) * 2,
             ', '.join(authors),
-            extra_reviewers))
+            status))
         print_hierarchy(change.get('dependencies', {}), indentation + 1)
 
 
