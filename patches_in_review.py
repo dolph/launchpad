@@ -173,7 +173,6 @@ def print_hierarchy(hierarchy, indentation=0):
             change['subject'],
             change['url'],
             status))
-        print('')
         extra_reviewers = (
             '; also reviewed by ' + ', '.join(sorted(reviewers))
             if reviewers else '')
@@ -181,7 +180,6 @@ def print_hierarchy(hierarchy, indentation=0):
             ' ' * (indentation + 1) * 2,
             ', '.join(authors),
             extra_reviewers))
-        print('')
         print_hierarchy(change.get('dependencies', {}), indentation + 1)
 
 
