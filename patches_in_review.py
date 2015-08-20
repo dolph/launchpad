@@ -136,26 +136,35 @@ def print_hierarchy(hierarchy, indentation=0):
         # remove authors from the reviewers list
         reviewers = set(reviewers).difference(authors)
 
+        crossout = False
+
         if blocked_by:
             status = ' (**blocked** by %s)' % ', '.join(sorted(blocked_by))
+            crossout = True
         elif approved_by and passing_tests is False:
             status = ' (approved but **failing**)'
         elif approved_by and passing_tests is None:
             status = ' (gating)'
+            crossout = True
         elif passing_tests is False:
             status = ' (failing)'
+            crossout = True
         elif passing_tests is None:
             status = ' (pending tests)'
+            crossout = True
         elif approved_by:
             # this is shown when an approved patch depends on one that is not
             # approved
             status = ' (approved)'
+            crossout = True
         elif work_in_progress:
             status = ' (WIP)'
+            crossout = True
         elif needs_revision_by:
             reviewers = set(reviewers).difference(needs_revision_by)
             status = (' (**needs revision** according to %s)' %
                       ', '.join(sorted(needs_revision_by)))
+            crossout = True
         elif plus_twos_by:
             status = (' (**+2** by %s)' %
                       ', '.join(sorted(plus_twos_by)))
@@ -170,8 +179,12 @@ def print_hierarchy(hierarchy, indentation=0):
         status += (' (reviewers: %s)' % ', '.join(sorted(reviewers))
                    if reviewers else '')
 
-        print('%s- %s[%s](%s) by %s%s' % (
+        if crossout:
+            status += '~~'
+
+        print('%s- %s%s[%s](%s) by %s%s' % (
             ' ' * indentation * 2,
+            '~~' if crossout else '',
             reference,
             change['subject'],
             change['url'],
