@@ -184,7 +184,7 @@ def print_hierarchy(hierarchy, indentation=0, hide_crossout=False):
                 ' ' * indentation * 2,
                 '~~' if crossout else '',
                 reference,
-                change['subject'],
+                change['subject'].rstrip('.'),
                 change['url'],
                 ', '.join(authors),
                 '~~' if crossout else '',
