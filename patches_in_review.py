@@ -179,16 +179,14 @@ def print_hierarchy(hierarchy, indentation=0):
         status += (' (reviewers: %s)' % ', '.join(sorted(reviewers))
                    if reviewers else '')
 
-        if crossout:
-            status += '~~'
-
-        print('%s- %s%s[%s](%s) by %s%s' % (
+        print('%s- %s%s[%s](%s) by %s%s%s' % (
             ' ' * indentation * 2,
             '~~' if crossout else '',
             reference,
             change['subject'],
             change['url'],
             ', '.join(authors),
+            '~~' if crossout else '',
             status))
         print_hierarchy(change.get('dependencies', {}), indentation + 1)
 
