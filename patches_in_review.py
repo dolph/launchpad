@@ -68,7 +68,7 @@ def build_hierarchy(changes):
     return hierarchy
 
 
-def print_hierarchy(hierarchy, indentation=0):
+def print_hierarchy(hierarchy, indentation=0, hide_crossout=False):
     if indentation >= MAX_INDENTATION:
         # bail early if we're being asked to produce markdown that github can't
         # render.
@@ -179,27 +179,34 @@ def print_hierarchy(hierarchy, indentation=0):
         status += (' (reviewers: %s)' % ', '.join(sorted(reviewers))
                    if reviewers else '')
 
-        print('%s- %s%s[%s](%s) by %s%s%s' % (
-            ' ' * indentation * 2,
-            '~~' if crossout else '',
-            reference,
-            change['subject'],
-            change['url'],
-            ', '.join(authors),
-            '~~' if crossout else '',
-            status))
-        print_hierarchy(change.get('dependencies', {}), indentation + 1)
+        if (not crossout) or (crossout and not hide_crossout):
+            print('%s- %s%s[%s](%s) by %s%s%s' % (
+                ' ' * indentation * 2,
+                '~~' if crossout else '',
+                reference,
+                change['subject'],
+                change['url'],
+                ', '.join(authors),
+                '~~' if crossout else '',
+                status))
+
+            print_hierarchy(
+                change.get('dependencies', {}),
+                indentation=indentation + 1,
+                hide_crossout=hide_crossout)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('project')
     parser.add_argument('--branch', default='master')
+    parser.add_argument('--hide-crossout', action='store_true',
+                        help='Hide items that would be crossed out anyway.')
     parser.add_argument('filters', nargs='*')
     args = parser.parse_args()
     changes = query(args.project, args.branch, args.filters)
     hierarchy = build_hierarchy(changes)
     if hierarchy:
-        print_hierarchy(hierarchy)
+        print_hierarchy(hierarchy, hide_crossout=args.hide_crossout)
     else:
         print('(this list is empty!)')
